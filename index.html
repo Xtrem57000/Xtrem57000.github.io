@@ -9,8 +9,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
-
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -18,66 +16,143 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+
+        :root {
+            --primary-color: #2c1810;
+            --secondary-color: #d4a064;
+            --accent-color: #8b4513;
+            --background-color: #f5f3f0;
+        }
+
         body {
-            background: #f5f5f5;
-            padding: 20px;
+            background: var(--background-color);
         }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+            text-align: center;
+            padding: 1rem;
+            font-family: 'Georgia', serif;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            background: var(--primary-color);
+            margin-bottom: 2rem;
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            padding: 20px;
         }
+
         .card {
             background: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            border: 1px solid rgba(212, 160, 100, 0.2);
         }
+
         .login-card {
             max-width: 400px;
             margin: 50px auto;
         }
+
         input, button {
             width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            border: 1px solid var(--secondary-color);
             border-radius: 4px;
+            font-size: 1rem;
         }
+
         button {
-            background: #4CAF50;
+            background: var(--accent-color);
             color: white;
             border: none;
             cursor: pointer;
+            transition: background 0.3s ease;
         }
+
         button:hover {
-            background: #45a049;
+            background: var(--primary-color);
         }
+
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 0.5rem;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin: 0.5rem 0;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            margin-top: 1rem;
         }
+
         th, td {
             padding: 12px;
             text-align: left;
             border-bottom: 1px solid #ddd;
         }
-        .status {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
+
+        th {
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
         }
-        .status-pending {
-            background: #ffd700;
+
+        tr:hover {
+            background-color: rgba(212, 160, 100, 0.1);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: bold;
+        }
+
+        .status-en-preparation {
+            background-color: #ffd700;
             color: black;
         }
+
+        .chart-container {
+            height: 300px;
+            margin-top: 1rem;
+        }
+
         .error {
             color: red;
-            margin-top: 10px;
             text-align: center;
+            margin-top: 0.5rem;
         }
     </style>
 </head>
@@ -92,40 +167,68 @@
     </div>
 
     <!-- Main Content -->
-    <div id="mainContent" class="container" style="display: none;">
-        <div class="card">
-            <h2>Commandes en cours</h2>
-            <table id="ordersTable">
-                <thead>
-                    <tr>
-                        <th>Client</th>
-                        <th>Articles</th>
-                        <th>Total</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
+    <div id="mainContent" style="display: none;">
+        <div class="logo">BARBOSSA</div>
+        <div class="container">
+            <!-- Dashboard -->
+            <div class="dashboard-grid">
+                <div class="card">
+                    <h2>Ventes du jour</h2>
+                    <div class="chart-container">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2>Statistiques</h2>
+                    <div class="stat-card">
+                        <div>Commandes du jour</div>
+                        <div class="stat-number">42</div>
+                    </div>
+                    <div class="stat-card">
+                        <div>Revenu total</div>
+                        <div class="stat-number">1250€</div>
+                    </div>
+                </div>
+            </div>
 
-        <div class="card">
-            <h2>Stock</h2>
-            <table id="inventoryTable">
-                <thead>
-                    <tr>
-                        <th>Produit</th>
-                        <th>Quantité</th>
-                        <th>Unité</th>
-                        <th>Alerte</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+            <!-- Orders -->
+            <div class="card">
+                <h2>Commandes en cours</h2>
+                <table id="ordersTable">
+                    <thead>
+                        <tr>
+                            <th>Client</th>
+                            <th>Articles</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <!-- Inventory -->
+            <div class="card">
+                <h2>Stock</h2>
+                <table id="inventoryTable">
+                    <thead>
+                        <tr>
+                            <th>Produit</th>
+                            <th>Quantité</th>
+                            <th>Unité</th>
+                            <th>Alerte</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
     <script>
-        // Votre configuration Firebase
+        // Configuration Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBVrw0lr1-AyZYycR5FwJQcBtrxh0MWMSg",
             authDomain: "barbossa-restaurant.firebaseapp.com",
@@ -149,18 +252,49 @@
 
             auth.signInWithEmailAndPassword(email, password)
                 .then((userCredential) => {
-                    console.log("Connexion réussie");
                     errorDiv.textContent = "Connexion réussie !";
                     errorDiv.style.color = "green";
                     document.getElementById('loginForm').style.display = 'none';
                     document.getElementById('mainContent').style.display = 'block';
+                    initializeCharts();
                     loadData();
                 })
                 .catch((error) => {
-                    console.error("Erreur de connexion:", error);
                     errorDiv.textContent = "Erreur : " + error.message;
                     errorDiv.style.color = "red";
                 });
+        }
+
+        // Initialize Charts
+        function initializeCharts() {
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['8h', '10h', '12h', '14h', '16h', '18h', '20h'],
+                    datasets: [{
+                        label: 'Ventes (€)',
+                        data: [150, 300, 450, 300, 200, 350, 500],
+                        borderColor: var(--accent-color),
+                        backgroundColor: 'rgba(139, 69, 19, 0.1)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
         }
 
         // Load Data
@@ -177,7 +311,8 @@
                             <td>${order.client}</td>
                             <td>${order.items.join(', ')}</td>
                             <td>${order.total}€</td>
-                            <td><span class="status status-${order.status}">${order.status}</span></td>
+                            <td><span class="status-badge status-${order.status}">${order.status}</span></td>
+                            <td><button onclick="updateOrderStatus('${doc.id}')">Modifier</button></td>
                         </tr>
                     `;
                     ordersTable.innerHTML += row;
@@ -197,6 +332,7 @@
                             <td>${item.quantity}</td>
                             <td>${item.unit}</td>
                             <td>${item.alertThreshold} ${item.unit}</td>
+                            <td><button onclick="updateInventory('${doc.id}')">Modifier</button></td>
                         </tr>
                     `;
                     inventoryTable.innerHTML += row;
@@ -204,11 +340,32 @@
             });
         }
 
+        // Update Order Status
+        function updateOrderStatus(orderId) {
+            const newStatus = prompt("Nouveau statut (en-preparation, pret, livre):");
+            if (newStatus) {
+                db.collection("orders").doc(orderId).update({
+                    status: newStatus
+                });
+            }
+        }
+
+        // Update Inventory
+        function updateInventory(itemId) {
+            const newQuantity = prompt("Nouvelle quantité:");
+            if (newQuantity) {
+                db.collection("inventory").doc(itemId).update({
+                    quantity: parseFloat(newQuantity)
+                });
+            }
+        }
+
         // Check Auth State
         auth.onAuthStateChanged((user) => {
             if (user) {
                 document.getElementById('loginForm').style.display = 'none';
                 document.getElementById('mainContent').style.display = 'block';
+                initializeCharts();
                 loadData();
             } else {
                 document.getElementById('loginForm').style.display = 'block';
